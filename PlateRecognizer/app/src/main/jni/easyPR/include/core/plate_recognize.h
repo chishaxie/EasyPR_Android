@@ -28,6 +28,8 @@ class CPlateRecognize : public CPlateDetect, public CCharsRecognise {
 
   int plateRecognize(Mat src, std::vector<std::string> &licenseVec);
 
+  int plateRecognize2(Mat src, std::vector<std::string> &licenseVec);
+
   //! 生活模式与工业模式切换
 
   inline void setLifemode(bool param) { CPlateDetect::setPDLifemode(param); }

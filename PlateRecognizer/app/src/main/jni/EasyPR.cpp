@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "EasyPR.h"
 
 #include "easyPR/include/core/plate_locate.h"
@@ -85,4 +87,32 @@ JNIEXPORT jbyteArray JNICALL Java_com_aiseminar_EasyPR_PlateRecognizer_plateReco
 	env->SetByteArrayRegion(jarray, 0, strlen(result), by);
 
 	return jarray;
+}
+
+JNIEXPORT jbyteArray JNICALL Java_com_aiseminar_EasyPR_PlateRecognizer_plateRecognize2(JNIEnv *env, jclass instance, jlong recognizerPtr, jstring imgpath) {
+    CPlateRecognize *pr = (CPlateRecognize *)recognizerPtr;
+
+    //  const string *img = (*env)->GetStringUTFChars(env, imgpath, 0);
+    char* img = jstring2str(env, imgpath);
+    Mat src = imread(img);
+
+    std::vector<std::string> plateVec;
+    int count = pr->plateRecognize2(src, plateVec);
+
+    std::string str = "nil";
+    if(! plateVec.empty() && count == 0) {
+        std::ostringstream oss;
+        for (std::vector<std::string>::const_iterator it = plateVec.begin();
+            it != plateVec.end(); it ++)
+            oss << (*it) << "$";
+        str = oss.str();
+    }
+
+    char *result = new char[str.length() + 1];
+    strcpy(result, str.c_str());
+    jbyte *by = (jbyte*) result;
+    jbyteArray jarray = env->NewByteArray(strlen(result));
+    env->SetByteArrayRegion(jarray, 0, strlen(result), by);
+
+    return jarray;
 }

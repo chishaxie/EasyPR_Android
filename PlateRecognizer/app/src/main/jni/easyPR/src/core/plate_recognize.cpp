@@ -84,4 +84,50 @@ int CPlateRecognize::plateRecognize(Mat src, std::vector<std::string> &licenseVe
 
   return resultPD;
 }
+
+int CPlateRecognize::plateRecognize2(Mat src, std::vector<std::string> &licenseVec) {
+
+  // 车牌方块集合
+
+  std::vector<CPlate> plateVec;
+
+  // 进行深度定位，使用颜色信息与二次Sobel
+
+  int resultPD = plateDetect(src, plateVec, kDebug, 0);
+
+  if (resultPD == 0) {
+    size_t num = plateVec.size();
+    int index = 0;
+
+    //依次识别每个车牌内的符号
+
+    for (size_t j = 0; j < num; j++) {
+      CPlate item = plateVec[j];
+      Mat plate = item.getPlateMat();
+
+      //获取车牌颜色
+
+      std::string plateType = getPlateColor(plate);
+
+      //获取车牌号
+
+      std::string plateIdentify = "";
+      int resultCR = charsRecognise(plate, plateIdentify);
+      if (resultCR == 0) {
+        std::string license = plateType + ":" + plateIdentify;
+        RotatedRect rr = item.getPlatePos();
+        std::ostringstream oss;
+        oss << rr.angle << ",";
+        oss << rr.center.x << "," << rr.center.y << ",";
+        oss << rr.size.width << "," << rr.size.height;
+        licenseVec.push_back(license + ":" + oss.str());
+      }
+    }
+
+    //完整识别过程到此结束
+  }
+
+  return resultPD;
+}
+
 }
